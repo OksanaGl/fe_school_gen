@@ -9,12 +9,15 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
+import { useNavigate } from 'react-router-dom';
+
 
 
 export const CourseCard = ({ previewImageLink, title, description, id, rating, lessonsCount, meta }) => {
+const navigate = useNavigate();
 
   return <Card sx={{ maxWidth: 345 }}>
-    <CardActionArea>
+    <CardActionArea onClick={()=> navigate(('/'+id))}>
       <CardMedia
         component="img"
         height="140"

@@ -1,11 +1,12 @@
+import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getCourse } from './requests';
-
 export const CoursePage = () => {
   const { itemID } = useParams();
+  const navigate = useNavigate()
 
-  const [course, setCourse] = useState(null)
+  const [course, setCourse] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -17,7 +18,7 @@ export const CoursePage = () => {
   }, []
   )
   console.log(course);
-  return <div>Course Page {course?.title}</div>
+  return <div>Course Page {course?.title}   <Button onClick={() => navigate(-1)}>Back</Button></div>
 };
 
 // export const CoursePageItem = () => {
