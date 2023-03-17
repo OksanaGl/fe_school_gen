@@ -5,7 +5,7 @@ import { getCoursesList } from "./requests";
 import styled from "styled-components";
 
 
-export const CoursesList = () => {
+export const CoursesListPage = () => {
   const [list,setList] = useState([])
   const [itemOffset, setItemOffset] = useState(0);
 
