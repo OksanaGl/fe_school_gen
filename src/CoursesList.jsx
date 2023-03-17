@@ -2,6 +2,7 @@ import { Grid, Pagination } from "@mui/material";
 import { useEffect, useState } from "react";
 import { CourseCard } from "./components/CourseCard";
 import { getCoursesList } from "./requests";
+import styled from "styled-components";
 
 
 export const CoursesList = () => {
@@ -29,11 +30,17 @@ export const CoursesList = () => {
 
 
   return <><Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}> 
-    {currentItems?.map((course)=>(<Grid  key={course?.id}  xs={4} item><CourseCard  {...course}/> </Grid>))}
+    {currentItems?.map((course)=>(<Grid  key={course?.id}  xs={12} sm={6} md={4} lg={3} item><CourseCard  {...course}/> </Grid>))}
     </Grid>
-    <Pagination onChange={setPage} count={pageCount} size="small"/>
+    <CustomPagination onChange={setPage} count={pageCount} size="small"/>
     </>
 
 }
 
-
+const CustomPagination = styled(Pagination)`
+.MuiPagination-ul{
+    justify-content: center;
+};
+&.MuiPagination-root{
+  margin: 20px auto;
+}`

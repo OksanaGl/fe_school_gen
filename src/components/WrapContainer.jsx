@@ -7,7 +7,7 @@ export default function WrapContainer({children}) {
   return (
     <React.Fragment>
       <CssBaseline />
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <Box sx={{ bgcolor: '#cfe8fc'}} >
         {children}
         </Box>

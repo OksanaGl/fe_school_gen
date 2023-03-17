@@ -1,4 +1,5 @@
-import { Button } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCourse } from './requests';
@@ -17,8 +18,18 @@ export const CoursePage = () => {
     fetchData()
   }, []
   )
-  console.log(course);
-  return <div>Course Page {course?.title}   <Button onClick={() => navigate(-1)}>Back</Button></div>
+  // console.log(course);
+  console.log(course?.courseVideoPreview?.link);
+  return <div><Button onClick={() => navigate(-1)}>Back</Button>
+  <br></br>
+  Course Page {course?.title}
+  <br></br>
+  <Grid>
+    <Box>
+    <Typography>{course?.meta?.courseVideoPreview?.link}</Typography>
+    </Box>
+  </Grid>
+  </div>
 };
 
 // export const CoursePageItem = () => {
