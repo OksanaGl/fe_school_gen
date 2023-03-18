@@ -18,7 +18,7 @@ export const CoursePage = () => {
   const navigate = useNavigate()
 
   const [course, setCourse] = useState(null);
-  const [lesson, setLesson] = useState(null)
+  const [lesson, setLesson] = useState(null); 
 
   useEffect(() => {
     async function fetchData() {
@@ -79,7 +79,7 @@ export const CoursePage = () => {
             <Box>
               <Typography variant="overline">Lessons List</Typography>
               <List>
-                {course?.lessons?.map((episode, i) => (<ListItem disablePadding key={episode?.order} onClick={()=> handleLesson(episode)} >
+                {course?.lessons?.sort((a,b)=>(a.order-b.order)).map((episode, i) => (<ListItem disablePadding key={episode?.order} onClick={()=> handleLesson(episode)} >
                   <ListItemText primary={
 
 
