@@ -23,7 +23,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 export const CourseCard = ({ previewImageLink, title, description, id, rating, lessonsCount, meta }) => {
 const navigate = useNavigate();
 
-  return <Grid xs={12}>
+  return <Grid xs={12} item>
   <Card>
     <CardActionArea onClick={()=> navigate(('/'+id))}>
       <CardMedia

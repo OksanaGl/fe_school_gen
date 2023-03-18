@@ -10,7 +10,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import styled from 'styled-components';
-import Tooltip from '@mui/material/Tooltip';
 import Badge from '@mui/material/Badge';
 
 export const CoursePage = () => {
@@ -18,7 +17,7 @@ export const CoursePage = () => {
   const navigate = useNavigate()
 
   const [course, setCourse] = useState(null);
-  const [lesson, setLesson] = useState(null); 
+  const [lesson, setLesson] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -28,16 +27,17 @@ export const CoursePage = () => {
 
     }
     fetchData()
+    // eslint-disable-next-line
   }, []
   )
 
-  const handleLesson = (lesson)=>{
+  const handleLesson = (lesson) => {
     setLesson(lesson)
   }
-  // console.log(course);
+  console.log(course?.status);
   console.log('LESSON:', lesson);
-  console.log('VIDEO link:', lesson?.link);
-  console.log('IMG link:', lesson?.previewImageLink+ '/' + lesson?.order + '.webp');
+  // console.log('VIDEO link:', lesson?.link);
+  // console.log('IMG link:', lesson?.previewImageLink + '/' + lesson?.order + '.webp');
   // console.log('ORDER:', lesson?.order);
   // console.log('STATUS:', course?.lesson?.status);
   // console.log(course?.meta?.courseVideoPreview?.link);
@@ -49,10 +49,15 @@ export const CoursePage = () => {
           <Box>
             <Typography variant="h5">Course Info</Typography>
             <Typography variant="h6">{course?.title}</Typography>
-            <Typography variant="inherit">Status: {course?.status}</Typography>
+            <CustomStackCourse>
+            <Typography variant="inherit">Status: </Typography>
+            <Typography variant="inherit" color={(course?.status === "launched") ? 'primary' : 'error'}>{course?.status}</Typography>
+            </CustomStackCourse>
             <Typography variant="inherit">Launch Date: {moment.utc(course?.launchDate).format('MM/DD/YYYY')}</Typography>
             <Typography variant="inherit">Duration: {Math.round(course?.duration / 60)} hours</Typography>
-            <Typography variant="inherit">Tags: {course?.tags?.map((tag, index) => (<Chip size="small" variant="filled" color="info" label={'#' + tag} key={index} />))}</Typography>
+            <CustomStackCourse>
+              <Typography variant="inherit">Tags:</Typography> {course?.tags?.map((tag, index) => (<Chip size="small" variant="filled" color="info" label={'#' + tag} key={index} />))}
+            </CustomStackCourse>
             <CustomStackCourse>
               <Typography variant="inherit">Skills:</Typography>
               {course?.meta?.skills?.map((skill, index) => (<Chip size="small" variant="outlined" color="primary" label={skill} key={index} maxLength={2} />))}
@@ -67,6 +72,7 @@ export const CoursePage = () => {
       <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} item>
         <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} item>
           <Grid xs={12} sm={12} md={6} lg={8} item>
+            <Typography variant="h6">Lesson Name </Typography>
             <Box>
               {/* <Typography>{course?.meta?.courseVideoPreview?.link}</Typography> */}
               <video controls width="100%" height="100%" type="video/m3u8" poster={lesson?.previewImageLink + '/' + lesson?.order + '.webp'}>
@@ -79,7 +85,7 @@ export const CoursePage = () => {
             <Box>
               <Typography variant="overline">Lessons List</Typography>
               <List>
-                {course?.lessons?.sort((a,b)=>(a.order-b.order)).map((episode, i) => (<ListItem disablePadding key={episode?.order} onClick={()=> handleLesson(episode)} >
+                {course?.lessons?.sort((a, b) => (a.order - b.order)).map((episode, i) => (<ListItem disablePadding key={episode?.order} onClick={() => handleLesson(episode)} >
                   <ListItemText primary={
 
 

@@ -28,8 +28,7 @@ export const CoursesListPage = () => {
 
   },[])
 
-
-  return <><Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}> 
+  return <><Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} item> 
     {currentItems?.map((course)=>(<Grid  key={course?.id}  xs={12} sm={6} md={4} lg={3} item><CourseCard  {...course}/> </Grid>))}
     </Grid>
     <CustomPagination onChange={setPage} count={pageCount} size="small"/>
