@@ -1,6 +1,6 @@
 import { Button, Grid, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCourse } from './requests';
 import moment from "moment";
@@ -11,6 +11,58 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import styled from 'styled-components';
 import Badge from '@mui/material/Badge';
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
+
+export const VideoJS = (props) => {
+  const videoRef = useRef(null);
+  const playerRef = useRef(null);
+  const { options, onReady } = props;
+
+  useEffect(() => {
+
+    // Make sure Video.js player is only initialized once
+    if (!playerRef.current) {
+      // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode. 
+      const videoElement = document.createElement("video-js");
+
+      videoElement.classList.add('vjs-big-play-centered');
+      videoRef.current.appendChild(videoElement);
+
+      const player = playerRef.current = videojs(videoElement, options, () => {
+        videojs.log('player is ready');
+        onReady && onReady(player);
+      });
+
+      // You could update an existing player in the `else` block here
+      // on prop change, for example:
+    } else {
+      const player = playerRef.current;
+
+      player.autoplay(options.autoplay);
+      player.src(options.sources);
+    }
+  }, [options, videoRef]);
+
+  // Dispose the Video.js player when the functional component unmounts
+  useEffect(() => {
+    const player = playerRef.current;
+
+    return () => {
+      if (player && !player.isDisposed()) {
+        player.dispose();
+        playerRef.current = null;
+      }
+    };
+  }, [playerRef]);
+
+  return (
+    <div data-vjs-player>
+      <div ref={videoRef} />
+    </div>
+  );
+}
+
 
 export const CoursePage = () => {
   const { itemID } = useParams();
@@ -22,8 +74,13 @@ export const CoursePage = () => {
   useEffect(() => {
     async function fetchData() {
       const getCoursePageItem = await getCourse(itemID);
-      setCourse(getCoursePageItem?.data)
-      setLesson(getCoursePageItem?.data?.lessons[0])
+      const courseData = {
+        ...getCoursePageItem?.data,
+        lessons: getCoursePageItem?.data?.lessons?.sort((a, b) => (a.order - b.order))
+      };
+
+      setCourse(courseData)
+      setLesson(courseData?.lessons[0])
 
     }
     fetchData()
@@ -32,15 +89,38 @@ export const CoursePage = () => {
   )
 
   const handleLesson = (lesson) => {
+    if (lesson.status === "locked") {
+      alert('This lesson is locked')
+      return
+    }
     setLesson(lesson)
   }
-  console.log(course?.status);
-  console.log('LESSON:', lesson);
-  // console.log('VIDEO link:', lesson?.link);
-  // console.log('IMG link:', lesson?.previewImageLink + '/' + lesson?.order + '.webp');
-  // console.log('ORDER:', lesson?.order);
-  // console.log('STATUS:', course?.lesson?.status);
-  // console.log(course?.meta?.courseVideoPreview?.link);
+  const playerRef = useRef(null);
+
+  const play = {
+    fill: true,
+    fluid: true,
+    autoplay: false,
+    controls: true,
+    preload: "metadata",
+    sources: [
+      {
+        src: lesson?.link,
+        type: "application/x-mpegURL"
+      },
+    ]
+  };
+
+  const handlePlayerReady = (player) => {
+    playerRef.current = player;
+    player.on('waiting', () => {
+    });
+
+    player.on('dispose', () => {
+    });
+  };
+  console.log('COURSE:', course);
+
   return <><div><Button onClick={() => navigate(-1)}>Back</Button>
     <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
 
@@ -48,10 +128,10 @@ export const CoursePage = () => {
         <Grid xs={12} sm={6} md={6} lg={6} item>
           <Box>
             <Typography variant="h5">Course Info</Typography>
-            <Typography variant="h6">{course?.title}</Typography>
+            <Typography variant="h6">Title: {course?.title}</Typography>
             <CustomStackCourse>
-            <Typography variant="inherit">Status: </Typography>
-            <Typography variant="inherit" color={(course?.status === "launched") ? 'primary' : 'error'}>{course?.status}</Typography>
+              <Typography variant="inherit">Status: </Typography>
+              <Typography variant="inherit" color={(course?.status === "launched") ? 'primary' : 'error'}>{course?.status}</Typography>
             </CustomStackCourse>
             <Typography variant="inherit">Launch Date: {moment.utc(course?.launchDate).format('MM/DD/YYYY')}</Typography>
             <Typography variant="inherit">Duration: {Math.round(course?.duration / 60)} hours</Typography>
@@ -65,19 +145,16 @@ export const CoursePage = () => {
           </Box>
         </Grid>
         <CustomGridCover xs={12} sm={6} md={6} lg={6} item>
-          <Box component="img" height="150px" alt={course?.title} src={course?.previewImageLink + '/cover.webp'}></Box>
+          <Box component="img" height="150px" alt={lesson?.title} src={lesson?.previewImageLink + '/' + lesson?.order + '.webp'}></Box>
         </CustomGridCover>
       </Grid>
 
       <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} item>
         <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} item>
           <Grid xs={12} sm={12} md={6} lg={8} item>
-            <Typography variant="h6">Lesson Name </Typography>
+            <Typography variant="h6">Lesson Name: {lesson?.title} </Typography>
             <Box>
-              {/* <Typography>{course?.meta?.courseVideoPreview?.link}</Typography> */}
-              <video controls width="100%" height="100%" type="video/m3u8" poster={lesson?.previewImageLink + '/' + lesson?.order + '.webp'}>
-                <source src={lesson?.link} type="video/m3u8" />
-              </video>
+              <VideoJS options={play} onReady={handlePlayerReady} />
             </Box>
           </Grid>
 
@@ -87,14 +164,9 @@ export const CoursePage = () => {
               <List>
                 {course?.lessons?.sort((a, b) => (a.order - b.order)).map((episode, i) => (<ListItem disablePadding key={episode?.order} onClick={() => handleLesson(episode)} >
                   <ListItemText primary={
-
-
                     <CustomBadge badgeContent={episode?.status} color={(episode?.status === "locked") ? 'error' : 'primary'}>
-
                       <Typography color={(episode?.status === "locked") ? 'error' : 'primary'}>{episode?.order + '. ' + episode?.title}</Typography>
-
                     </CustomBadge>
-
                   } />
                 </ListItem>))}
               </List>
@@ -102,9 +174,7 @@ export const CoursePage = () => {
           </Grid>
         </Grid>
       </Grid>
-
     </Grid>
-
   </div>
   </>
 };
@@ -133,19 +203,6 @@ const CustomBadge = styled(Badge)`
     top: 4px;
     right: -30px;}
     `
-
-// export const CoursePageItem = () => {
-//   const course = useState([])
-
-//   useEffect(() => {
-//     async function fetchData() {
-//       const getCoursePageItem = await getCourse(itemID);
-//       course(getCoursePageItem?.)
-//     }
-//     fetchData()
-//   }
-//   )
-// }
 
 
 
