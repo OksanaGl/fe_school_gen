@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -15,20 +14,58 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { VideoJS } from './VideoJS';
+import { useRef, useState, useEffect } from 'react';
 
 
 export const CourseCard = ({ previewImageLink, title, description, id, rating, lessonsCount, meta }) => {
   const navigate = useNavigate();
+  const [hover, setHover] = useState(false);
+  const videoUrl = meta?.courseVideoPreview?.link
+  const playerRef = useRef(null);
+  const play = {
+    fill: true,
+    fluid: true,
+    autoplay: false,
+    controls: false,
+    muted: true,
+    height: 140,
+    responsive: true,
+    preload: "metadata",
+    sources: [
+      {
+        src: videoUrl,
+        type: "application/x-mpegURL"
+      },
+    ]
+  };
+  useEffect(() => {
+    if (hover) {
+      playerRef?.current?.play()
+    } else {
+      playerRef?.current?.pause()
+    }
+  },
+    [hover, playerRef?.current])
+
+  const handlePlayerReady = (player) => {
+    playerRef.current = player;
+  };
 
   return <Grid xs={12} item>
-    <Card>
+    <Card
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}>
       <CardActionArea onClick={() => navigate(('/' + id))}>
-        <CardMedia
-          component="img"
-          height="140"
-          image={previewImageLink + '/cover.webp'}
-          alt={title}
-        />
+        <WrapperVideo hover={hover}>
+          <VideoJS options={play} style={{ display: 'none' }} onReady={handlePlayerReady} />
+          <CardMedia
+            component="img"
+            height="140"
+            image={previewImageLink + '/cover.webp'}
+            alt={title}
+          />
+        </WrapperVideo>
         <CardContent>
           <Typography paragraph variant="h6" component="div" align="left">
             {title}
@@ -67,4 +104,18 @@ flex-wrap: wrap;
 .MuiChip-root{
   margin: 2px;
 }
+`
+
+const WrapperVideo = styled.div`
+img{
+  display:${(props) => props.hover ? 'none' : 'block'};
+}
+div{
+  display: ${(props) => props.hover ? 'block' : 'none'};
+  height:140px;
+  overflow:hidden;
+}
+
+ 
+ 
 `
